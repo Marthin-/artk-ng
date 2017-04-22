@@ -5,6 +5,8 @@ from map_generator.SpriteSheetHandler import SpriteSheetWriter
 
 
 class MapConverter:
+    """ Converts a text based map to it's image equivalent. """
+
     def __init__(self, filename=None):
         self.text_map = list()
         self.size_x = 0
@@ -17,16 +19,26 @@ class MapConverter:
             self.read_from_disk(filename)
 
     def read_from_disk(self, filename):
+        """
+        Read a text map from the disk.
+        :param filename: Path to the map
+        """
+
         with open(filename) as map_file:
             for line in map_file:
                 self.text_map.append(line.replace('\n', ''))
 
     def convert(self, path_to_tileset):
+        """
+        Converts the text map to image.
+        :param path_to_tileset: A path to a yaml file describing the tileset to use and it's tags
+        """
 
         self._convert_to_tile()
         self._convert_to_image(path_to_tileset)
 
     def _convert_to_tile(self):
+        """ Converts ascii charaters to tileset tag. """
 
         self.size_y = len(self.text_map)
         self.tiled_map = list()
@@ -50,14 +62,17 @@ class MapConverter:
                     tmp.append(self._get_wall(x, y))
                 else:
                     print("Unknown tile at : [{}, {}]".format(x, y))
+                    tmp.append('default')
 
             self.size_x = max(self.size_x, len(line))
             self.tiled_map.append(tmp)
-        for line in self.tiled_map:
-            print(line)
 
     def _get_wall(self, x, y):
-
+        """
+        Find the right tag for the wall at given coordinates
+        :param x: X coordinates
+        :param y: Y coordinates
+        """
         wall_type = 0
         current_line = self.text_map[y]
         previous_line = self.text_map[y - 1] if y > 0 else None
@@ -81,6 +96,11 @@ class MapConverter:
         return "wall" + str(wall_type)
 
     def _convert_to_image(self, path_to_tileset):
+        """ 
+        Convert tag representation of the map to image.
+        :path_to_tileset Path to a yaml file describing the tileset to use and it's tags
+        """
+
         import os
         writer = None
 
@@ -99,7 +119,7 @@ class MapConverter:
 
                 for y, line in enumerate(self.tiled_map):
                     for x, tile in enumerate(line):
-                        writer.add_image(reader.get_tile(tile))
+                        writer.add_tile(reader.get_tile(tile))
 
         if not writer:
             raise Exception('Error during conversion to image')
@@ -107,12 +127,19 @@ class MapConverter:
         self.final_map = writer.get_img()
 
     def save_map(self, filename):
+        """
+        Save image map to the disk
+        :param filename: Path to save image
+        """
+
         if self.final_map:
             self.final_map.save(filename)
         else:
             raise Exception("There's no image to save :/")
 
     def show_map(self):
+        """ Display map on screen. """
+
         if self.final_map:
             self.final_map.show()
         else:

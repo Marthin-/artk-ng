@@ -2,15 +2,28 @@ from PIL import Image
 
 
 class SpriteSheetReader:
-    """ Handle reading from tileset. """
+    """ Handle reading in tileset. """
 
     def __init__(self, image_name, tile_tags, tile_size=16, margin=0):
+        """
+        Constructor in attributes
+        :param image_name: Path to the tileset on disk
+        :param tile_tags: Dictionary, associates a tag/name with it's position in tileset eg tile_tags['door'] = [0, 0]
+        :param tile_size: Size of the tileset
+        :param margin: Optional margin between tiles in file
+        """
         self.spriteSheet = Image.open(image_name)
         self.tile_tags = tile_tags
         self.tileSize = tile_size
         self.margin = margin
 
     def get_tile(self, tag):
+        """
+        Find the tile associate to given tag.
+        :param tag: Tile searched
+        :return: Corresponding tile
+        """
+
         tile_x = self.tile_tags[tag][0]
         tile_y = self.tile_tags[tag][1]
 
@@ -35,24 +48,36 @@ class SpriteSheetWriter:
         self.pos_x = 0
         self.pos_y = 0
 
-    def get_cur_pos(self):
+    def _get_cur_pos(self):
+        """ Find the next correct position to put a new tile in self.spritesheet. """
+
         self.pos_x = (self.tileSize * self.tileX) + (self.margin * (self.tileX + 1))
         self.pos_y = (self.tileSize * self.tileY) + (self.margin * (self.tileY + 1))
         if self.pos_x + self.tileSize > self.size_x:
             self.tileX = 0
             self.tileY = self.tileY + 1
-            self.get_cur_pos()
+            self._get_cur_pos()
         if (self.pos_y + self.tileSize) > self.size_y:
             raise Exception('Image does not fit within spritesheet!')
 
-    def add_image(self, image, rotation=0):
+    def add_tile(self, image, rotation=0):
+        """
+        Push image with optional rotation next to the last tile.
+        Uses _get_cur_pos to find the current position
+        :param image: tile to add
+        :param rotation: optional rotation should be equal to 0 modulo 90
+        """
+
         if rotation % 90:
             raise Exception("Given rotation can't be used : {}".format(rotation))
 
-        self.get_cur_pos()
-        destBox = (self.pos_x, self.pos_y, self.pos_x + image.size[0], self.pos_y + image.size[1])
-        self.spritesheet.paste(image.rotate(rotation), destBox)
+        self._get_cur_pos()
+        dest_box = (self.pos_x, self.pos_y, self.pos_x + image.size[0], self.pos_y + image.size[1])
+        self.spritesheet.paste(image.rotate(rotation), dest_box)
         self.tileX = self.tileX + 1
 
     def get_img(self):
+        """
+        :return Final image.
+        """
         return self.spritesheet

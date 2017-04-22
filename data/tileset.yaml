@@ -34,4 +34,5 @@ Tileset:
     wall15: [14, 12]
     table: [1, 13]
     chair: [2, 12]
+    default: [0, 0]
 
