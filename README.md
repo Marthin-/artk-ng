@@ -1,7 +1,4 @@
 # artk-ng
-pythfinder++--
-
-# artk-ng
 ### Another rpg toolkit - next generation
 
 ---

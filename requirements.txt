@@ -1,0 +1,4 @@
+Pillow >= 4.0
+pyyaml > 3.0
+pytest >= 3.0
+pytest-pep8 > 1.0
