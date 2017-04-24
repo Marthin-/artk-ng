@@ -1,0 +1,7 @@
+Legend:
+  "#": wall
+  "T": table
+  "^": stairsUp
+  "v": stairsDown
+  "+": door
+  " ": floor
