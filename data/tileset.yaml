@@ -16,6 +16,12 @@ Tileset:
     door: [5, 12]
     stairsUp: [12, 3]
     stairsDown: [14, 3]
+    loot: [11, 0]
+    chest: [2, 9]
+    human: [0, 4]
+    dwarf_1: [1, 0]
+    dwarf_2: [2, 0]
+    mushroom: [3, 0]
     wall:
       0: [7, 12]
       1: [7, 12]

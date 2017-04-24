@@ -5,3 +5,9 @@ Legend:
   "v": stairsDown
   "+": door
   " ": floor
+  "$": loot
+  "=": chest
+  "H": human
+  "d": dwarf_1
+  "D": dwarf_2
+  "¤": mushroom
