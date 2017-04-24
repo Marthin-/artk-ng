@@ -56,6 +56,11 @@ class SpriteSheetWriter:
         if (self.pos_y + self.tileSize) > self.size_y:
             raise Exception('Image does not fit within spritesheet!')
 
+    def next_line(self):
+        """ Switch to the next line."""
+        self.tileY += 1
+        self.tileX = 0
+
     def add_tile(self, image, rotation=0):
         """
         Push image with optional rotation next to the last tile.
