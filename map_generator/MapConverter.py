@@ -28,72 +28,68 @@ class MapConverter:
             for line in map_file:
                 self.text_map.append(line.replace('\n', ''))
 
-    def convert(self, path_to_tileset):
+    def convert(self, path_to_legend, path_to_tileset):
         """
         Converts the text map to image.
         :param path_to_tileset: A path to a yaml file describing the tileset to use and it's tags
         """
 
-        self._convert_to_tile()
+        self._convert_to_tile(path_to_legend)
         self._convert_to_image(path_to_tileset)
 
-    def _convert_to_tile(self):
+    def _convert_to_tile(self, path_to_legend):
         """ Converts ascii charaters to tileset tag. """
 
         self.size_y = len(self.text_map)
         self.tiled_map = list()
 
-        for y, line in enumerate(self.text_map):
-            tmp = list()
-            for x, tile in enumerate(line):
-                if tile == '\n':
-                    pass
-                elif tile == '^':
-                    tmp.append('stairsUp')
-                elif tile == 'v':
-                    tmp.append('stairsDown')
-                elif tile == 'T':
-                    tmp.append('table')
-                elif tile == '+':
-                    tmp.append('door')
-                elif tile == ' ':
-                    tmp.append('floor')
-                elif tile == '#':
-                    tmp.append(self._get_wall(x, y))
-                else:
-                    print("Unknown tile at : [{}, {}]".format(x, y))
-                    tmp.append('default')
+        with open(path_to_legend) as tileset:
 
-            self.size_x = max(self.size_x, len(line))
-            self.tiled_map.append(tmp)
+            legend = yaml.load(tileset)['Legend']
+            if legend is None:
+                raise Exception("Error when opening legend file.")
+
+            for y, line in enumerate(self.text_map):
+                tmp = list()
+                for x, tile in enumerate(line):
+                    if tile == '\n':
+                        pass
+                    elif tile in legend.keys():
+                        tmp.append(legend[tile])
+                    else:
+                        print("Unknown tile at : [{}, {}]".format(x, y))
+                        tmp.append('default')
+
+                self.size_x = max(self.size_x, len(line))
+                self.tiled_map.append(tmp)
 
     def _get_wall(self, x, y):
         """
-        Find the right tag for the wall at given coordinates
+        Find the right id for the tile at given coordinates. In case of multiple sprites for on tag
         :param x: X coordinates
         :param y: Y coordinates
         """
-        wall_type = 0
+        sprite_id = 0
         current_line = self.text_map[y]
         previous_line = self.text_map[y - 1] if y > 0 else None
         next_line = self.text_map[y + 1] if y + 1 < len(self.text_map) else None
 
         # UP
         if previous_line is not None and x < len(previous_line) and previous_line[x] == '#':
-            wall_type += 1
+            sprite_id += 1
         # RIGHT
         if x + 1 < len(current_line) and current_line[x + 1] == '#':
-            wall_type += 2
+            sprite_id += 2
 
         # BOTTOM
         if next_line is not None and x < len(next_line) and next_line[x] == '#':
-            wall_type += 4
+            sprite_id += 4
 
         # LEFT
         if x - 1 >= 0 and current_line[x - 1] == '#':
-            wall_type += 8
+            sprite_id += 8
 
-        return "wall" + str(wall_type)
+        return sprite_id
 
     def _convert_to_image(self, path_to_tileset):
         """ 
@@ -113,13 +109,25 @@ class MapConverter:
                 if not os.path.exists(path):
                     raise Exception('Tileset does not exist')
 
+                tile_tags = tileset_config['Tileset']['Tiles']
+
                 # Tileset writer & reader
-                reader = SpriteSheetReader(path, tileset_config['Tileset']['Tiles'], meta['size'])
+                reader = SpriteSheetReader(path, meta['size'])
                 writer = SpriteSheetWriter(meta['size'], self.size_x, self.size_y)
 
                 for y, line in enumerate(self.tiled_map):
                     for x, tile in enumerate(line):
-                        writer.add_tile(reader.get_tile(tile))
+
+                        tag = tile_tags[tile]
+
+                        if type(tag) is list:
+                            coord = tag
+
+                        else:  # multiple sprite for on tag
+                            sprite_id = self._get_wall(x, y)
+                            coord = tag[sprite_id]
+
+                        writer.add_tile(reader.get_tile(coord[0], coord[1]))
 
         if not writer:
             raise Exception('Error during conversion to image')

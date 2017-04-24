@@ -4,28 +4,24 @@ from PIL import Image
 class SpriteSheetReader:
     """ Handle reading in tileset. """
 
-    def __init__(self, image_name, tile_tags, tile_size=16, margin=0):
+    def __init__(self, image_name, tile_size=16, margin=0):
         """
         Constructor in attributes
         :param image_name: Path to the tileset on disk
-        :param tile_tags: Dictionary, associates a tag/name with it's position in tileset eg tile_tags['door'] = [0, 0]
         :param tile_size: Size of the tileset
         :param margin: Optional margin between tiles in file
         """
         self.spriteSheet = Image.open(image_name)
-        self.tile_tags = tile_tags
         self.tileSize = tile_size
         self.margin = margin
 
-    def get_tile(self, tag):
+    def get_tile(self, tile_x, tile_y):
         """
         Find the tile associate to given tag.
-        :param tag: Tile searched
+        :param tile_x: X position
+        :param tile_y: Y position
         :return: Corresponding tile
         """
-
-        tile_x = self.tile_tags[tag][0]
-        tile_y = self.tile_tags[tag][1]
 
         pos_x = (self.tileSize * tile_x) + (self.margin * (tile_x + 1))
         pos_y = (self.tileSize * tile_y) + (self.margin * (tile_y + 1))
