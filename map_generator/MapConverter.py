@@ -128,6 +128,7 @@ class MapConverter:
                             coord = tag[sprite_id]
 
                         writer.add_tile(reader.get_tile(coord[0], coord[1]))
+                    writer.next_line()
 
         if not writer:
             raise Exception('Error during conversion to image')
